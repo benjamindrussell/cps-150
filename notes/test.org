@@ -1,0 +1,16 @@
+* Heading 1
++ Hello
++ My name is ben
++ how are you
+** Heading 1.1
+** Heading 1.2
+** Heading 1.3
++ swag
++ yo
+*** Heading 1.3.1
++ penis and balls
+
+* [ ] list one
++ [ ] two
+
+* org mode is swag
