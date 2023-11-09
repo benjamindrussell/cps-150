@@ -14,7 +14,7 @@ public class Pig {
         while(playerOne < 100 && playerTwo < 100){
             sum = 0;
             while(true){
-                roll = (int) Math.random() * 6 + 1;
+                roll = (int) (Math.random() * 6) + 1;
                 System.out.println("You rolled: " + roll);
                 if(roll == 1){
                     System.out.println("You lose your turn! Your total is " + playerOne);
@@ -22,7 +22,7 @@ public class Pig {
                 }
                 sum += roll;
                 System.out.println("Your turn score is " + sum + " and your total score is " + playerOne);
-                System.out.println("If you hold, you will have " + sum + playerOne + " points.");
+                System.out.println("If you hold, you will have " + (sum + playerOne) + " points.");
                 System.out.println("Enter 'r' to roll again, 's' to stop.");
                 rollAgain = in.nextLine();
                 if(rollAgain.toLowerCase().equals("s")){
@@ -31,15 +31,17 @@ public class Pig {
                     break;
                 }
             }
+            System.out.println();
             if(playerOne >= 100){
                 break;
             } 
             sum = 0;
             while (sum < 20) {
-                roll = (int) Math.random() * 6 + 1;
+                roll = (int) (Math.random() * 6) + 1;
                 System.out.println("The computer rolled: " + roll);
                 if(roll == 1){
                     System.out.println("The computer lost its turn! Computer total is " + playerTwo);
+                    sum = 0;
                     break;
                 }
                 sum += roll;
@@ -47,7 +49,9 @@ public class Pig {
                     System.out.println("The computer holds.");
                 }
             }
+            playerTwo += sum;
             System.out.println("The computer's score is " + playerTwo);
+            System.out.println();
         }
 
         if(playerOne > playerTwo){
