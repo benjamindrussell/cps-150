@@ -35,7 +35,7 @@ public class Peevish_Postman
     
     // ADD YOUR CODE BETWEEN THIS LINE ...
     for(int i = 1; i <= 100; i++){
-      for(int j = i; j < 100; j += i){
+      for(int j = i; j <= 100; j += i){
         doors[j] = !doors[j];
       }
     }
