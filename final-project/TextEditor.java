@@ -3,8 +3,10 @@ import java.io.*;
 import javax.swing.JFileChooser;
 
 public class TextEditor {
-    public static void main(String[] args) {
-        Scanner in = new Scanner(System.in);
+    static Scanner in = new Scanner(System.in);
+    static Scanner fileReader = null;
+    static File filePath = null;
+    public static void main(String[] args) throws FileNotFoundException{
         // Program State
         boolean isRunning = true; //
 
@@ -44,13 +46,13 @@ public class TextEditor {
 
             switch (input) {
                 case 1:
-                    openNewDocument(currentFile, in, in);
+                    openNewDocument(currentFile);
                     break;
                 case 2:
-                    saveCurrentDocument();
+                    saveCurrentDocument(currentFile);
                     break;
                 case 3:
-                    displayCurrentDocument();
+                    displayCurrentDocument(currentFile);
                     break;
                 case 4:
                     displayDocumentLine();
@@ -97,20 +99,45 @@ public class TextEditor {
     }
 
     /*
-     * In: ArrayList<String>, Scanner
+     * In: ArrayList<String>
      * Out: Nothing
-     * Reads txt file into the array list that is passed as a parameter
+     * Reads txt file into the array list that is passed as a parameter, uses JFileChooser to get user unput
      */
-    public static void openNewDocument(ArrayList<String> file, Scanner in, Scanner fileReader){
+    public static void openNewDocument(ArrayList<String> currentFile) throws FileNotFoundException{
+        JFileChooser fileChooser = new JFileChooser();        
+        try {
+            if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                filePath = fileChooser.getSelectedFile();
+                fileReader = new Scanner(filePath);
+            }
+        } catch (IOException e) {
+            System.out.println("\n*** fatal I/O error ***");
+            return;
+        }
+
+        while(fileReader.hasNextLine()){
+            currentFile.add(fileReader.nextLine());
+        }
+
+        System.out.println("\nDocument open completed.\n");
+    }
+
+
+    public static void saveCurrentDocument(ArrayList<String> currentFile){
 
     }
 
-    public static void saveCurrentDocument(){
-
-    }
-
-    public static void displayCurrentDocument(){
-
+    /*
+     * In: ArrayList<String>
+     * Out: Nothing
+     * Displays the current open document
+     */
+    public static void displayCurrentDocument(ArrayList<String> currentFile){
+        System.out.println();
+        for(int i = 0; i < currentFile.size(); i++){
+            System.out.println((i + 1) + ". " + currentFile.get(i));
+        }
+        System.out.println();
     }
 
     public static void displayDocumentLine(){
