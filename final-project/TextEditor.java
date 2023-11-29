@@ -8,7 +8,7 @@ public class TextEditor {
     static File filePath = null;
     public static void main(String[] args) throws FileNotFoundException{
         // Program State
-        boolean isRunning = true; //
+        boolean isRunning = true;
 
         // ArrayList of strings representing the lines of the file
         ArrayList<String> currentFile = new ArrayList<String>();
@@ -55,7 +55,7 @@ public class TextEditor {
                     displayCurrentDocument(currentFile);
                     break;
                 case 4:
-                    displayDocumentLine();
+                    displayDocumentLine(currentFile);
                     break;
                 case 5:
                     addDocumentLine();
@@ -140,8 +140,26 @@ public class TextEditor {
         System.out.println();
     }
 
-    public static void displayDocumentLine(){
+    public static void displayDocumentLine(ArrayList<String> currentFile){
+        int lineNumber = 0;
+        do{
+            System.out.print("\nLine number >>> ");
+                try {
+                    lineNumber = in.nextInt();
+                    in.nextLine(); // consume \n
+                } catch (InputMismatchException e) {
+                    System.out.println("*** fatal input mismatch error ***");
+                    in.nextLine(); // prevents infinite loop
+                    lineNumber = -1; // meets condition to keep looping
+                    continue; // skip to looping condition
+                }
 
+                if(lineNumber < 1 || lineNumber > currentFile.size()){
+                    System.out.println("*** Invalid line number ***");
+                }
+        } while (lineNumber < 1 || lineNumber > currentFile.size());
+
+        System.out.println("\n" + currentFile.get(lineNumber - 1));
     }
 
     public static void addDocumentLine(){
