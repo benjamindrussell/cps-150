@@ -1,3 +1,9 @@
+/*
+ * Author: Ben Russell
+ * Date: 11/30/2023
+ * Purpose: A simple yet fully functional and usable text editor written for the final project in CPS 150  
+ */
+
 import java.util.*;
 import java.io.*;
 import javax.swing.JFileChooser;
@@ -6,7 +12,8 @@ public class TextEditor {
     static Scanner in = new Scanner(System.in);
     static Scanner fileReader = null;
     static File filePath = null;
-    public static void main(String[] args) throws FileNotFoundException{
+
+    public static void main(String[] args) throws FileNotFoundException {
         // Program State
         boolean isRunning = true;
 
@@ -32,18 +39,19 @@ public class TextEditor {
                     input = in.nextInt();
                     in.nextLine(); // consume \n
                 } catch (InputMismatchException e) {
-                    System.out.println("*** fatal input mismatch error ***");
+                    System.out.println("\n*** fatal input mismatch error ***");
                     in.nextLine(); // prevents infinite loop
                     input = -1; // meets condition to keep looping
                     continue; // skip to looping condition
                 }
                 // if the integer input is out of range then tell the user
-                if(input < 1 || input > 9){
-                    System.out.println("*** unknown choice; try again ***");
+                if (input < 1 || input > 9) {
+                    System.out.println("\n*** unknown choice; try again ***");
                 }
                 // if the integer input is out of range continue getting input
             } while (input < 1 || input > 9);
 
+            // call function to handle one of the 9 options
             switch (input) {
                 case 1:
                     openNewDocument(currentFile);
@@ -58,24 +66,24 @@ public class TextEditor {
                     displayDocumentLine(currentFile);
                     break;
                 case 5:
-                    addDocumentLine();
+                    addDocumentLine(currentFile);
                     break;
                 case 6:
-                    insertDocumentLine();
+                    insertDocumentLine(currentFile);
                     break;
                 case 7:
-                    changeDocumentLine();
+                    changeDocumentLine(currentFile);
                     break;
                 case 8:
-                    deleteDocumentLine();
+                    deleteDocumentLine(currentFile);
                     break;
-                case 9: 
+                case 9:
                     endProgram();
                     break;
                 default:
                     break;
             }
-        } 
+        }
     }
 
     /*
@@ -85,46 +93,84 @@ public class TextEditor {
      */
     public static void printMainMenu() {
         System.out.println("Main Menu\n" +
-                "Please make a selection:\n\t" +
-                "1. Open a new document\n\t" +
-                "2. Save the current document\n\t" +
-                "3. Display the current document\n\t" +
-                "4. Display a document line\n\t" +
-                "5. Add a document line\n\t" +
-                "6. Insert a document line\n\t" +
-                "7. Change a document line\n\t" +
-                "8. Delete a document line\n\t" +
-                "9. End the program");
+                "Please make a selection:\n" +
+                "    1. Open a new document\n" +
+                "    2. Save the current document\n" +
+                "    3. Display the current document\n" +
+                "    4. Display a document line\n" +
+                "    5. Add a document line\n" +
+                "    6. Insert a document line\n" +
+                "    7. Change a document line\n" +
+                "    8. Delete a document line\n" +
+                "    9. End the program");
         System.out.print(">>> ");
     }
 
     /*
      * In: ArrayList<String>
      * Out: Nothing
-     * Reads txt file into the array list that is passed as a parameter, uses JFileChooser to get user unput
+     * Reads txt file into the array list that is passed as a parameter, uses
+     * JFileChooser to get user unput
      */
-    public static void openNewDocument(ArrayList<String> currentFile) throws FileNotFoundException{
-        JFileChooser fileChooser = new JFileChooser();        
+    public static void openNewDocument(ArrayList<String> currentFile) throws FileNotFoundException {
+        JFileChooser fileChooser = new JFileChooser();
+        // get input with jfilechooser, try catch to prevent the user from opening a
+        // document that doesn't exist
         try {
-            if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+            int returnedByFileChooser = fileChooser.showOpenDialog(null);
+            if (returnedByFileChooser == JFileChooser.APPROVE_OPTION) {
                 filePath = fileChooser.getSelectedFile();
                 fileReader = new Scanner(filePath);
+            } else if (returnedByFileChooser == JFileChooser.CANCEL_OPTION) {
+                System.out.println("\nOpen operation cancelled.\n");
+                return;
             }
         } catch (IOException e) {
             System.out.println("\n*** fatal I/O error ***");
             return;
         }
 
-        while(fileReader.hasNextLine()){
+        // clear previous file
+        for (int i = 0; i < currentFile.size(); i++) {
+            currentFile.set(i, "");
+        }
+
+        // read the file into the ArrayList one line at a time
+        while (fileReader.hasNextLine()) {
             currentFile.add(fileReader.nextLine());
         }
 
         System.out.println("\nDocument open completed.\n");
     }
 
+    /*
+     * In: ArrayList<String>
+     * Out: nothing
+     * saves current open document to disk
+     */
+    public static void saveCurrentDocument(ArrayList<String> currentFile) throws FileNotFoundException {
+        JFileChooser fileChooser = new JFileChooser();
 
-    public static void saveCurrentDocument(ArrayList<String> currentFile){
+        // If the current document is a new document, get user input with jfilechooser
+        // for the location and name of the file to be saved
+        if (filePath == null) {
+                int returnedByFileChooser = fileChooser.showSaveDialog(null);
+                if (returnedByFileChooser == JFileChooser.APPROVE_OPTION) {
+                    filePath = fileChooser.getSelectedFile();
+                } else if (returnedByFileChooser == JFileChooser.CANCEL_OPTION) {
+                    System.out.println("\nSave operation cancelled.\n");
+                    return;
+                }
+        }
 
+        // write data from currentFile ArrayList to disk
+        PrintWriter out = new PrintWriter(filePath);
+        for (int i = 0; i < currentFile.size(); i++) {
+            out.println(currentFile.get(i));
+        }
+        out.close();
+
+        System.out.println("\nDocument save completed.\n");
     }
 
     /*
@@ -132,53 +178,140 @@ public class TextEditor {
      * Out: Nothing
      * Displays the current open document
      */
-    public static void displayCurrentDocument(ArrayList<String> currentFile){
+    public static void displayCurrentDocument(ArrayList<String> currentFile) {
         System.out.println();
-        for(int i = 0; i < currentFile.size(); i++){
-            System.out.println((i + 1) + ". " + currentFile.get(i));
+        // iterate through ArrayList and output the contents of each index one line at a
+        // time
+        for (int i = 0; i < currentFile.size(); i++) {
+            System.out.println((i + 1) + ": " + currentFile.get(i));
         }
         System.out.println();
     }
 
-    public static void displayDocumentLine(ArrayList<String> currentFile){
-        int lineNumber = 0;
-        do{
-            System.out.print("\nLine number >>> ");
-                try {
-                    lineNumber = in.nextInt();
-                    in.nextLine(); // consume \n
-                } catch (InputMismatchException e) {
-                    System.out.println("*** fatal input mismatch error ***");
-                    in.nextLine(); // prevents infinite loop
-                    lineNumber = -1; // meets condition to keep looping
-                    continue; // skip to looping condition
-                }
-
-                if(lineNumber < 1 || lineNumber > currentFile.size()){
-                    System.out.println("*** Invalid line number ***");
-                }
-        } while (lineNumber < 1 || lineNumber > currentFile.size());
-
-        System.out.println("\n" + currentFile.get(lineNumber - 1));
+    /*
+     * In: ArrayList<String>
+     * Out: Nothing
+     * Display document line specified by user
+     */
+    public static void displayDocumentLine(ArrayList<String> currentFile) {
+        int lineNumber = getLineNumber(currentFile.size());
+        if (lineNumber == -1)
+            return; // if getLineNumber decides it's not a valid line, return immediately
+        System.out.println("\n" + lineNumber + ": " + currentFile.get(lineNumber - 1));
     }
 
-    public static void addDocumentLine(){
-
+    /*
+     * In: ArrayList<String>
+     * Out: nothing
+     * adds a new line to the end of the current open file
+     */
+    public static void addDocumentLine(ArrayList<String> currentFile) {
+        System.out.print("\nNew text >>> ");
+        // get text for the new line from System.in and append the line to the end of
+        // the currentFile ArrayList
+        currentFile.add(in.nextLine());
     }
 
-    public static void insertDocumentLine(){
+    /*
+     * In: ArrayList<String>
+     * Out: nothing
+     * inserts a new line in the middle or beginning of the current open file
+     */
+    public static void insertDocumentLine(ArrayList<String> currentFile) {
+        int lineNumber = getLineNumber(currentFile.size());
+        // the user may not insert a line at the end, because that is the job of the
+        // addDocumentLine function
+        if (lineNumber == currentFile.size()) {
+            System.out.println("\n*** Invalid line number ***");
+            return;
+        } else if (lineNumber == -1) {
+            return;
+        }
 
+        // get user input from System.in and insert it at the specified line number
+        System.out.print("\nNew text >>> ");
+        currentFile.add(lineNumber - 1, in.nextLine());
     }
 
-    public static void changeDocumentLine(){
+    /*
+     * In: ArrayList<String>
+     * Out: nothing
+     * changes the line specified by the user to new text specified by the user
+     */
+    public static void changeDocumentLine(ArrayList<String> currentFile) {
+        int lineNumber = getLineNumber(currentFile.size());
+        if (lineNumber == -1)
+            return; // if getLineNumber decides it's not a valid line, return immediately
 
+        // get user input from System.in
+        System.out.print("\nNew text >>> ");
+        String lineToAdd = in.nextLine();
+
+        // user verifies their decision
+        System.out.print("Change line " + lineNumber + "; are you sure? ");
+        // if the first letter of their word is a y, then update the line, otherwise do
+        // nothing
+        if (in.next().substring(0, 1).toLowerCase().equals("y")) {
+            currentFile.set(lineNumber - 1, lineToAdd);
+        }
     }
 
-    public static void deleteDocumentLine(){
+    /*
+     * In: ArrayList<String>
+     * Out: nothing
+     * deletes document line specified by user
+     */
+    public static void deleteDocumentLine(ArrayList<String> currentFile) {
+        int lineNumber = getLineNumber(currentFile.size());
+        if (lineNumber == -1) return; // if getLineNumber decides it's not a valid line, return immediately
 
+        // user verifies their decision
+        System.out.print("Delete line " + lineNumber + "; are you sure? ");
+        // if the first letter of their word is a y, then update the line, otherwise do
+        // nothing
+        if (in.next().substring(0, 1).toLowerCase().equals("y")) {
+            currentFile.remove(lineNumber - 1);
+        }
     }
 
-    public static void endProgram(){
+    /*
+     * In: nothing
+     * Out: nothing
+     * close scanners and exit the program
+     */
+    public static void endProgram() {
+        System.out.println("\nThanks for using my software; have a good day :)");
+        // if statements prevent calling close method on a null object
+        if (in != null) in.close();
+        if (fileReader != null) fileReader.close();
+        System.exit(0);
+    }
 
+    /*
+     * In: int
+     * Out: int
+     * get user input for a line number, return the specified line number if the
+     * number is valid, return -1 otherwise
+     */
+    public static int getLineNumber(int fileSize) {
+        int lineNumber = -1;
+        System.out.print("\nLine number >>> ");
+        // try catch to prevent user from entering a non-integer
+        try {
+            lineNumber = in.nextInt();
+            in.nextLine(); // consume \n
+        } catch (InputMismatchException e) {
+            System.out.println("\n*** fatal input mismatch error ***");
+            in.nextLine(); // prevents infinite loop
+            return -1; // -1 indicates error
+        }
+        // if the integer input is out of range then tell the user and immediately
+        // return -1 to indicate error
+        if (lineNumber < 0 || lineNumber > fileSize) {
+            System.out.println("\n*** Invalid line number ***");
+            return -1;
+        }
+
+        return lineNumber;
     }
 }
