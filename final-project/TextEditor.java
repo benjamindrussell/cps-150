@@ -1,7 +1,6 @@
 /*
- * Author: Ben Russell
- * Date: 11/30/2023
- * Purpose: A simple yet fully functional and usable text editor written for the final project in CPS 150  
+ * TextEditor.java
+ * Ben Russell
  */
 
 import java.util.*;
@@ -14,6 +13,29 @@ public class TextEditor {
     static File filePath = null;
 
     public static void main(String[] args) throws FileNotFoundException {
+        /*
+         * Name: Ben Russell
+         * Assignment: Final Project Text Editor
+         * 
+         * Description: Build a simple yet fully functional and usable text editor
+         * 
+         * Bug Report:
+         * 1. Index out of bounds exception in deleteDocumentLine because I forgot to
+         * convert the line number to the real index
+         * 2. I had a problem where the program was skipping inputs and it was because
+         * the nextInt method doesn't consume the entire line, meaning the \n from the
+         * user hitting enter was still there. I fixed this by just adding a call to the
+         * nextLine method directly after the nextInt call
+         * 3. After my try catch caught an Input mismatch error, the program would enter
+         * an infinite loop. A quick google search told me to add a call to the nextLine
+         * method to prevent this
+         * 4. It would originally take two tries to close out of the showOpenDialog and
+         * showSaveDialog. This was because in my else if statements, I was calling the
+         * method twice, once in the header of the if, and once in the header of the if
+         * else. I fixed this by creating a variable that stores the result of the
+         * called method so it only needs to be called once
+         */
+        
         // Program State
         boolean isRunning = true;
 
@@ -79,6 +101,7 @@ public class TextEditor {
                     break;
                 case 9:
                     endProgram();
+                    isRunning = false; // end looping and thus end the program
                     break;
                 default:
                     break;
@@ -113,12 +136,20 @@ public class TextEditor {
      * JFileChooser to get user unput
      */
     public static void openNewDocument(ArrayList<String> currentFile) throws FileNotFoundException {
+
+
         JFileChooser fileChooser = new JFileChooser();
         // get input with jfilechooser, try catch to prevent the user from opening a
         // document that doesn't exist
         try {
             int returnedByFileChooser = fileChooser.showOpenDialog(null);
             if (returnedByFileChooser == JFileChooser.APPROVE_OPTION) {
+                // clear previous file
+                int fileSize = currentFile.size();
+                for (int i = 0; i < fileSize; i++) {
+                    currentFile.remove(0);
+                }
+
                 filePath = fileChooser.getSelectedFile();
                 fileReader = new Scanner(filePath);
             } else if (returnedByFileChooser == JFileChooser.CANCEL_OPTION) {
@@ -128,11 +159,6 @@ public class TextEditor {
         } catch (IOException e) {
             System.out.println("\n*** fatal I/O error ***");
             return;
-        }
-
-        // clear previous file
-        for (int i = 0; i < currentFile.size(); i++) {
-            currentFile.set(i, "");
         }
 
         // read the file into the ArrayList one line at a time
@@ -221,7 +247,7 @@ public class TextEditor {
         int lineNumber = getLineNumber(currentFile.size());
         // the user may not insert a line at the end, because that is the job of the
         // addDocumentLine function
-        if (lineNumber == currentFile.size()) {
+        if (lineNumber - 1 == currentFile.size()) {
             System.out.println("\n*** Invalid line number ***");
             return;
         } else if (lineNumber == -1) {
@@ -277,14 +303,13 @@ public class TextEditor {
     /*
      * In: nothing
      * Out: nothing
-     * close scanners and exit the program
+     * close scanners and print closing message 
      */
     public static void endProgram() {
         System.out.println("\nThanks for using my software; have a good day :)");
         // if statements prevent calling close method on a null object
         if (in != null) in.close();
         if (fileReader != null) fileReader.close();
-        System.exit(0);
     }
 
     /*
